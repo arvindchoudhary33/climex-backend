@@ -1,6 +1,7 @@
 import express from "express";
 import { User } from "../models/user.model";
 import { auth } from "../middlewares/auth.middleware";
+import { superAdminCheck } from "../middlewares/superAdmin.middleware";
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.get("/all", auth, async (req, res) => {
+router.get("/all", auth, superAdminCheck, async (req, res) => {
   try {
     const users = await User.find({}).select("-password");
     res.json({
@@ -58,7 +59,7 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", auth, superAdminCheck, async (req, res) => {
   try {
     const updates = req.body;
     delete updates.password; // Prevent password update through this route
@@ -94,8 +95,34 @@ router.put("/:id", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.post("/:id/change-password", auth, superAdminCheck, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
 
-router.delete("/:id", auth, async (req, res) => {
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.password = newPassword;
+    await user.save(); 
+
+    res.json({
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Password update error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.delete("/:id", auth, superAdminCheck, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
