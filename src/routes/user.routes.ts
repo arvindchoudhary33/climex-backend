@@ -34,6 +34,18 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.get("/all", auth, async (req, res) => {
+  try {
+    const users = await User.find({}).select("-password");
+    res.json({
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.get("/profile", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
@@ -46,17 +58,61 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
-router.get("/all", auth, async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
-    const users = await User.find({}).select("-password");
+    const updates = req.body;
+    delete updates.password; // Prevent password update through this route
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (updates.email && updates.email !== user.email) {
+      const existingUser = await User.findOne({
+        email: updates.email,
+        _id: { $ne: req.params.id }, // Exclude current user from check
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          message: "Email address is already in use by another user",
+        });
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+    }).select("-password");
+
     res.json({
-      count: users.length,
-      users,
+      message: "User updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
+    console.error("Update error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({
+      message: "User deleted successfully",
+      userId: req.params.id,
+    });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.put("/profile", auth, async (req, res) => {
   try {
     const updates = req.body;
