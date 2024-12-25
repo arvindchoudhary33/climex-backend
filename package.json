@@ -1,17 +1,15 @@
 {
   "name": "climex-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/app.js",
   "engines": {
     "node": "23.x"
   },
   "scripts": {
-    "start": "node dist/app.js",
+    "start": "node ./dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "npm install && tsc",
-    "postbuild": "cp package.json dist/",
-    "clean": "rm -rf dist",
-    "prebuild": "npm run clean"
+    "build": "tsc",
+    "postinstall": "npm run build"
   },
   "keywords": [],
   "author": "",
