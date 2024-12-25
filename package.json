@@ -8,10 +8,10 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "tsc -p tsconfig.json",
-    "lint": "eslint . --ext .ts",
-    "test": "jest",
-    "postinstall": "npm run build"
+    "build": "npm install && tsc",
+    "postbuild": "cp package.json dist/",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
   },
   "keywords": [],
   "author": "",
