@@ -47,15 +47,38 @@ router.get("/documents", async (req: Request, res: Response) => {
 
 router.get("/temperature", async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate, locationId } = req.query;
+    const { startdate, enddate, locationId, datatypeid = "TAVG" } = req.query;
+
+    if (!startdate || !enddate || !locationId) {
+      return res.status(400).json({
+        error:
+          "Missing required parameters. Please provide startdate, enddate, and locationId",
+      });
+    }
+
+    const start = new Date(startdate as string);
+    const end = new Date(enddate as string);
+    const today = new Date();
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({
+        error: "Invalid date format. Please use YYYY-MM-DD format",
+      });
+    }
+
+    if (end > today) {
+      return res.status(400).json({
+        error: "End date cannot be in the future",
+      });
+    }
 
     const response = await axios.get(`${NCDC_API}/data`, {
       params: {
         datasetid: "GHCND",
-        datatypeid: "TAVG",
+        datatypeid: datatypeid,
         locationid: locationId,
-        startdate: startDate,
-        enddate: endDate,
+        startdate: startdate,
+        enddate: enddate,
         units: "metric",
         limit: 1000,
       },
@@ -64,13 +87,34 @@ router.get("/temperature", async (req: Request, res: Response) => {
       },
     });
 
+    console.log("response", response.data);
+    if (!response.data?.results?.length) {
+      return res.json({
+        results: [],
+        message: "No data available for the specified criteria",
+      });
+    }
+
     res.json(response.data);
   } catch (error) {
     console.error("NCDC API error:", error);
-    res.status(500).json({ error: "Failed to fetch temperature data" });
+
+    if (axios.isAxiosError(error)) {
+      const statusCode = error.response?.status || 500;
+      const errorMessage = error.response?.data?.error || error.message;
+      res.status(statusCode).json({
+        error: "Failed to fetch temperature data",
+        details: errorMessage,
+        message: error.message,
+      });
+    } else {
+      res.status(500).json({
+        error: "Failed to fetch temperature data",
+        details: "An unexpected error occurred",
+      });
+    }
   }
 });
-
 router.get("/overview", async (req: Request, res: Response) => {
   try {
     const { region } = req.query;
