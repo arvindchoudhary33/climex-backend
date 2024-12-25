@@ -17,15 +17,7 @@ const port = process.env.PORT || 8000;
 connectDB();
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: ["https://climex.live", "http://localhost:5173"],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
-
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
