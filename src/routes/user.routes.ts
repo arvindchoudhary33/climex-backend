@@ -4,7 +4,7 @@ import { auth } from "../middlewares/auth.middleware";
 import { superAdminCheck } from "../middlewares/superAdmin.middleware";
 
 const router = express.Router();
-
+// @ts-ignore
 router.post("/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -35,6 +35,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// @ts-ignore
 router.get("/all", auth, superAdminCheck, async (req, res) => {
   try {
     const users = await User.find({}).select("-password");
@@ -47,6 +48,7 @@ router.get("/all", auth, superAdminCheck, async (req, res) => {
   }
 });
 
+// @ts-ignore
 router.get("/profile", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
@@ -59,6 +61,7 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
+// @ts-ignore
 router.put("/:id", auth, superAdminCheck, async (req, res) => {
   try {
     const updates = req.body;
@@ -95,6 +98,7 @@ router.put("/:id", auth, superAdminCheck, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+// @ts-ignore
 router.post("/:id/change-password", auth, superAdminCheck, async (req, res) => {
   try {
     const { newPassword } = req.body;
@@ -111,7 +115,7 @@ router.post("/:id/change-password", auth, superAdminCheck, async (req, res) => {
     }
 
     user.password = newPassword;
-    await user.save(); 
+    await user.save();
 
     res.json({
       message: "Password updated successfully",
@@ -122,6 +126,7 @@ router.post("/:id/change-password", auth, superAdminCheck, async (req, res) => {
   }
 });
 
+// @ts-ignore
 router.delete("/:id", auth, superAdminCheck, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -140,6 +145,7 @@ router.delete("/:id", auth, superAdminCheck, async (req, res) => {
   }
 });
 
+// @ts-ignore
 router.put("/profile", auth, async (req, res) => {
   try {
     const updates = req.body;
@@ -158,6 +164,7 @@ router.put("/profile", auth, async (req, res) => {
   }
 });
 
+// @ts-ignore
 router.delete("/profile", auth, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.user.userId);

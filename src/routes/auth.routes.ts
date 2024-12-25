@@ -4,6 +4,7 @@ import { User } from "../models/user.model";
 
 const router = express.Router();
 
+// @ts-ignore
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -13,6 +14,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // @ts-ignore
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });

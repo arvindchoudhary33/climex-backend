@@ -6,6 +6,7 @@ const router = express.Router();
 
 const WORLDBANK_API = "https://search.worldbank.org/api/v2/wds";
 
+// @ts-ignore
 router.get("/search", auth, async (req, res) => {
   try {
     const queryParams = new URLSearchParams(

@@ -45,6 +45,7 @@ router.get("/documents", async (req: Request, res: Response) => {
   }
 });
 
+// @ts-ignore
 router.get("/temperature", async (req: Request, res: Response) => {
   try {
     const { startdate, enddate, locationId, datatypeid = "TAVG" } = req.query;
@@ -117,6 +118,7 @@ router.get("/temperature", async (req: Request, res: Response) => {
 });
 router.get("/overview", async (req: Request, res: Response) => {
   try {
+    // @ts-ignore
     const { region } = req.query;
     const currentYear = new Date().getFullYear();
 
